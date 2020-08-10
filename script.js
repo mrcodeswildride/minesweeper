@@ -1,157 +1,190 @@
-var rows = document.querySelectorAll(".row");
-var squares = document.querySelectorAll(".row div");
-var minesLeftDisplay = document.getElementById("minesLeft");
-var restartButton = document.getElementById("restart");
-var messageDisplay = document.getElementById("message");
+let squares = document.getElementsByClassName(`square`)
+let minesLeftParagraph = document.getElementById(`minesLeftParagraph`)
+let messageParagraph = document.getElementById(`messageParagraph`)
+let playAgainButton = document.getElementById(`playAgainButton`)
 
-var numMines = 10;
-var numFlags = 0;
-var gameInProgress = true;
-var squareClicked = false;
+let numMines = 10
+let numFlags = 0
+let squareClicked = false
+let gameOver = false
 
-for (var i = 0; i < squares.length; i++) {
-    squares[i].addEventListener("mousedown", clickSquare);
-    squares[i].addEventListener("contextmenu", function() {
-        event.preventDefault();
-    });
+for (let square of squares) {
+  square.addEventListener(`mousedown`, clickSquare)
+  square.addEventListener(`contextmenu`, disableContextMenu)
 }
 
-restartButton.addEventListener("click", restart);
+playAgainButton.addEventListener(`click`, playAgain)
 
 function clickSquare(event) {
-    if (gameInProgress && !squareClicked) {
-        squareClicked = true;
-        randomSetup(this);
+  if (!squareClicked) {
+    randomSetup(this)
+    squareClicked = true
+  }
+
+  if (!this.classList.contains(`selected`) && !gameOver) {
+    if (event.buttons == 1 && !this.classList.contains(`flag`)) {
+      if (!this.classList.contains(`mine`)) {
+        selectSquare(this)
+        checkWin()
+      }
+      else {
+        hitMine()
+      }
     }
-
-    if (gameInProgress && !this.classList.contains("selected")) {
-        if (event.buttons == 1 && !this.classList.contains("flag")) {
-            if (this.classList.contains("mine")) {
-                gameInProgress = false;
-                messageDisplay.innerHTML = "You lose";
-
-                for (var i = 0; i < squares.length; i++) {
-                    if (squares[i].classList.contains("mine") && !squares[i].classList.contains("flag")) {
-                        squares[i].classList.add("mine-revealed");
-                    }
-                    else if (squares[i].classList.contains("flag") && !squares[i].classList.contains("mine")) {
-                        squares[i].classList.add("flag-x");
-                    }
-                }
-            }
-            else {
-                selectSquare(this);
-                checkWin();
-            }
-        }
-        else if (event.buttons == 2) {
-            if (this.classList.contains("flag")) {
-                numFlags--;
-
-            }
-            else {
-                numFlags++;
-            }
-
-            minesLeftDisplay.innerHTML = "Mines Left: " + (numMines - numFlags);
-            this.classList.toggle("flag");
-        }
+    else if (event.buttons == 2) {
+      toggleFlag(this)
     }
+  }
 }
 
-function randomSetup(square) {
-    var squareNumbers = [];
+function randomSetup(clickedSquare) {
+  let squareNumbers = []
 
-    for (var i = 0; i < squares.length; i++) {
-        if (squares[i] != square) {
-            squareNumbers.push(i);
-        }
+  for (let i = 0; i < squares.length; i++) {
+    if (squares[i] != clickedSquare) {
+      squareNumbers.push(i)
     }
+  }
 
-    for (var i = 0; i < squareNumbers.length * 10; i++) {
-        var randomNumber1 = Math.floor(Math.random() * squareNumbers.length);
-        var randomNumber2 = Math.floor(Math.random() * squareNumbers.length);
+  for (let i = 0; i < squareNumbers.length * 10; i++) {
+    let randomNumber1 = Math.floor(Math.random() * squareNumbers.length)
+    let randomNumber2 = Math.floor(Math.random() * squareNumbers.length)
 
-        var temp = squareNumbers[randomNumber2];
-        squareNumbers[randomNumber2] = squareNumbers[randomNumber1];
-        squareNumbers[randomNumber1] = temp;
-    }
+    let temp = squareNumbers[randomNumber1]
+    squareNumbers[randomNumber1] = squareNumbers[randomNumber2]
+    squareNumbers[randomNumber2] = temp
+  }
 
-    for (var i = 0; i < numMines; i++) {
-        var squareNumber = squareNumbers[i];
-        squares[squareNumber].classList.add("mine");
-    }
+  for (let i = 0; i < numMines; i++) {
+    let squareNumber = squareNumbers[i]
+    squares[squareNumber].classList.add(`mine`)
+  }
 }
 
 function selectSquare(square) {
-    square.classList.add("selected");
+  square.classList.add(`selected`)
 
-    var neighbors = [
-        getNeighbor(square, -1, 0),
-        getNeighbor(square, -1, -1),
-        getNeighbor(square, 0, -1),
-        getNeighbor(square, 1, -1),
-        getNeighbor(square, 1, 0),
-        getNeighbor(square, 1, 1),
-        getNeighbor(square, 0, 1),
-        getNeighbor(square, -1, 1)
-    ];
+  let neighbors = [
+    getNeighbor(square, -1, -1),
+    getNeighbor(square, 0, -1),
+    getNeighbor(square, 1, -1),
+    getNeighbor(square, -1, 0),
+    getNeighbor(square, 1, 0),
+    getNeighbor(square, -1, 1),
+    getNeighbor(square, 0, 1),
+    getNeighbor(square, 1, 1)
+  ]
 
-    var mineCount = 0;
+  let mineCount = 0
 
-    for (var i = 0; i < neighbors.length; i++) {
-        if (neighbors[i] && neighbors[i].classList.contains("mine")) {
-            mineCount++;
-        }
+  for (let neighbor of neighbors) {
+    if (neighbor != null && neighbor.classList.contains(`mine`)) {
+      mineCount++
     }
+  }
 
-    square.classList.add("mines" + mineCount);
+  square.classList.add(`mines${mineCount}`)
 
-    if (mineCount == 0) {
-        for (var i = 0; i < neighbors.length; i++) {
-            if (neighbors[i] && !neighbors[i].classList.contains("selected") && !neighbors[i].classList.contains("flag")) {
-                selectSquare(neighbors[i]);
-            }
-        }
+  if (mineCount == 0) {
+    for (let neighbor of neighbors) {
+      if (neighbor != null && !neighbor.classList.contains(`selected`) && !neighbor.classList.contains(`flag`)) {
+        selectSquare(neighbor)
+      }
     }
-    else {
-        square.innerHTML = mineCount;
-    }
+  }
+  else {
+    square.innerHTML = mineCount
+  }
 }
 
 function getNeighbor(square, xDiff, yDiff) {
-    var x = parseInt(square.getAttribute("index"), 10);
-    var y = parseInt(square.parentElement.getAttribute("index"), 10);
+  // array of rows
+  let rows = document.getElementsByClassName(`row`)
 
-    var row = rows[y + yDiff];
-    var neighbor = null;
+  let row = square.parentElement // row of square
+  let y // y coordinate of square, set below
+  let x // x coordinate of square, set below
 
-    if (row) {
-        neighbor = row.children[x + xDiff];
+  // loop through rows to determine y
+  for (let i = 0; i < rows.length; i++) {
+    if (rows[i] == row) {
+      y = i // found matching row, so set y
     }
+  }
 
-    return neighbor;
+  // loop through squares in row to determine x
+  for (let i = 0; i < row.children.length; i++) {
+    if (row.children[i] == square) {
+      x = i // found matching square, so set x
+    }
+  }
+
+  // row of neighbor square
+  let neighborRow = rows[y + yDiff]
+
+  if (neighborRow == null) {
+    // row is beyond edge, so no neighbor square
+    return null
+  }
+  else {
+    // if x + xDiff is beyond edge, will be null
+    return neighborRow.children[x + xDiff]
+  }
 }
 
 function checkWin() {
-    var selectedSquares = document.querySelectorAll(".selected");
+  let selectedSquares = document.getElementsByClassName(`selected`)
 
-    if (selectedSquares.length == squares.length - numMines) {
-        gameInProgress = false;
-        messageDisplay.innerHTML = "Good job!";
-    }
+  if (selectedSquares.length == squares.length - numMines) {
+    messageParagraph.innerHTML = `Good job!`
+    playAgainButton.style.display = `block`
+    gameOver = true
+  }
 }
 
-function restart() {
-    numFlags = 0;
-    gameInProgress = true;
-    squareClicked = false;
+function hitMine() {
+  messageParagraph.innerHTML = `You lose`
+  playAgainButton.style.display = `block`
+  gameOver = true
 
-    minesLeftDisplay.innerHTML = "Mines Left: " + numMines;
-    messageDisplay.innerHTML = "";
-
-    for (var i = 0; i < squares.length; i++) {
-        squares[i].innerHTML = "";
-        squares[i].className = "";
+  for (let square of squares) {
+    if (square.classList.contains(`mine`) && !square.classList.contains(`flag`)) {
+      square.classList.add(`revealed`)
     }
+    else if (square.classList.contains(`flag`) && !square.classList.contains(`mine`)) {
+      square.classList.add(`flag-x`)
+    }
+  }
+}
+
+function toggleFlag(square) {
+  if (!square.classList.contains(`flag`)) {
+    numFlags++
+
+  }
+  else {
+    numFlags--
+  }
+
+  square.classList.toggle(`flag`)
+  minesLeftParagraph.innerHTML = `Mines Left: ${numMines - numFlags}`
+}
+
+function disableContextMenu(event) {
+  event.preventDefault()
+}
+
+function playAgain() {
+  numFlags = 0
+  squareClicked = false
+  gameOver = false
+
+  for (let square of squares) {
+    square.innerHTML = ``
+    square.className = `square`
+  }
+
+  minesLeftParagraph.innerHTML = `Mines Left: ${numMines}`
+  messageParagraph.innerHTML = ``
+  playAgainButton.style.display = `none`
 }

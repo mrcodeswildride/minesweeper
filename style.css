@@ -1,0 +1,98 @@
+body {
+  background-color: beige;
+}
+
+#grid,
+#sidePanel {
+  display: inline-block;
+  vertical-align: top;
+}
+
+#grid {
+  border: 1px solid black;
+  font-size: 0;
+  margin-right: 30px;
+  margin-bottom: 30px;
+}
+
+.square {
+  display: inline-block;
+  vertical-align: top;
+  width: 35px;
+  height: 35px;
+  background-color: white;
+  border: 1px solid black;
+  font-family: "Courier New", Courier, monospace;
+  font-size: 25px;
+  font-weight: bold;
+  text-align: center;
+  line-height: 35px;
+  user-select: none;
+}
+
+.mines0 {
+  background-color: #bdbdbd;
+}
+
+.mines1 {
+  color: #0000ff;
+}
+
+.mines2 {
+  color: #007b00;
+}
+
+.mines3 {
+  color: #fa0d0d;
+}
+
+.mines4 {
+  color: #00007b;
+}
+
+.mines5 {
+  color: #7b0000;
+}
+
+.mines6 {
+  color: #007b7b;
+}
+
+.mines7 {
+  color: #000000;
+}
+
+.mines8 {
+  color: #8a8a8a;
+}
+
+.revealed {
+  background-color: red;
+}
+
+.flag {
+  background-image: url("flag.png");
+}
+
+.flag-x {
+  background-image: url("flag-x.png");
+}
+
+#instructions,
+#minesLeftParagraph,
+#messageParagraph {
+  width: 325px;
+  font-size: 24px;
+  margin-top: 0;
+  margin-bottom: 25px;
+}
+
+#messageParagraph {
+  color: #ff4c00;
+  font-size: 50px;
+}
+
+#playAgainButton {
+  display: none;
+  padding: 5px;
+}
