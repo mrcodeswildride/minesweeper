@@ -26,12 +26,10 @@ function clickSquare(event) {
       if (!this.classList.contains(`mine`)) {
         selectSquare(this)
         checkWin()
-      }
-      else {
+      } else {
         hitMine()
       }
-    }
-    else if (event.buttons == 2) {
+    } else if (event.buttons == 2) {
       toggleFlag(this)
     }
   }
@@ -72,7 +70,7 @@ function selectSquare(square) {
     getNeighbor(square, 1, 0),
     getNeighbor(square, -1, 1),
     getNeighbor(square, 0, 1),
-    getNeighbor(square, 1, 1)
+    getNeighbor(square, 1, 1),
   ]
 
   let mineCount = 0
@@ -87,12 +85,15 @@ function selectSquare(square) {
 
   if (mineCount == 0) {
     for (let neighbor of neighbors) {
-      if (neighbor != null && !neighbor.classList.contains(`selected`) && !neighbor.classList.contains(`flag`)) {
+      if (
+        neighbor != null &&
+        !neighbor.classList.contains(`selected`) &&
+        !neighbor.classList.contains(`flag`)
+      ) {
         selectSquare(neighbor)
       }
     }
-  }
-  else {
+  } else {
     square.innerHTML = mineCount
   }
 }
@@ -125,8 +126,7 @@ function getNeighbor(square, xDiff, yDiff) {
   if (neighborRow == null) {
     // row is beyond edge, so no neighbor square
     return null
-  }
-  else {
+  } else {
     // if x + xDiff is beyond edge, will be null
     return neighborRow.children[x + xDiff]
   }
@@ -150,8 +150,7 @@ function hitMine() {
   for (let square of squares) {
     if (square.classList.contains(`mine`) && !square.classList.contains(`flag`)) {
       square.classList.add(`revealed`)
-    }
-    else if (square.classList.contains(`flag`) && !square.classList.contains(`mine`)) {
+    } else if (square.classList.contains(`flag`) && !square.classList.contains(`mine`)) {
       square.classList.add(`flag-x`)
     }
   }
@@ -160,9 +159,7 @@ function hitMine() {
 function toggleFlag(square) {
   if (!square.classList.contains(`flag`)) {
     numFlags++
-
-  }
-  else {
+  } else {
     numFlags--
   }
 
